@@ -172,6 +172,24 @@ var (
 			Name:      "load_safepoint_total",
 			Help:      "Counter of load safepoint.",
 		}, []string{"type"})
+
+	writeBinlogLatency = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: "tidb",
+			Subsystem: "tikvclient",
+			Name:      "write_binlog_latency",
+			Help:      "Bucketed histogram of write binglog.",
+			Buckets:   prometheus.ExponentialBuckets(0.0005, 2, 18),
+		}, []string{"type"})
+
+	writeTikvLatency = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: "tidb",
+			Subsystem: "tikvclient",
+			Name:      "write_tikv_latency",
+			Help:      "Bucketed histogram of write tikv.",
+			Buckets:   prometheus.ExponentialBuckets(0.0005, 2, 18),
+		}, []string{"type"})
 )
 
 func reportRegionError(e *errorpb.Error) {
@@ -213,4 +231,6 @@ func init() {
 	prometheus.MustRegister(rawkvSizeHistogram)
 	prometheus.MustRegister(txnRegionsNumHistogram)
 	prometheus.MustRegister(loadSafepointCounter)
+	prometheus.MustRegister(writeBinlogLatency)
+	prometheus.MustRegister(writeTikvLatency)
 }

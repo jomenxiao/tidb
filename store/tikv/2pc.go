@@ -593,19 +593,23 @@ func (c *twoPhaseCommitter) execute(ctx goctx.Context) error {
 	// So use a new Background() context instead of inherit the ctx, this is by design,
 	// to avoid the cancel signal from parent context.
 	ctx = opentracing.ContextWithSpan(goctx.Background(), span)
-
+	startTS := time.Now()
 	binlogChan := c.prewriteBinlog()
 	err := c.prewriteKeys(NewBackoffer(prewriteMaxBackoff, ctx), c.keys)
+	tikvTS := time.Now()
 	if binlogChan != nil {
 		binlogErr := <-binlogChan
 		if binlogErr != nil {
 			return errors.Trace(binlogErr)
 		}
+		binlogTS := time.Now()
+		writeBinlogLatency.WithLabelValues("writebinlog").Observe(binlogTS.Sub(startTS).Nanoseconds())
 	}
 	if err != nil {
 		log.Debugf("2PC failed on prewrite: %v, tid: %d", err, c.startTS)
 		return errors.Trace(err)
 	}
+	writeTikvLatency.WithLabelValues("writetikv").Observe(tikvTS.Sub(startTS).Nanoseconds())
 
 	commitTS, err := c.store.getTimestampWithRetry(NewBackoffer(tsoMaxBackoff, ctx))
 	if err != nil {
