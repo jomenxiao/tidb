@@ -173,22 +173,22 @@ var (
 			Help:      "Counter of load safepoint.",
 		}, []string{"type"})
 
-	writeBinlogLatency = prometheus.NewHistogramVec(
+	writeBinlogLatency = prometheus.NewHistogram(
 		prometheus.HistogramOpts{
 			Namespace: "tidb",
 			Subsystem: "tikvclient",
 			Name:      "write_binlog_latency",
 			Help:      "Bucketed histogram of write binglog.",
-			Buckets:   prometheus.ExponentialBuckets(0.0005, 2, 18),
+			Buckets:   prometheus.ExponentialBuckets(1, 2, 21),
 		}, []string{"type"})
 
-	writeTikvLatency = prometheus.NewHistogramVec(
+	writeTikvLatency = prometheus.NewHistogram(
 		prometheus.HistogramOpts{
 			Namespace: "tidb",
 			Subsystem: "tikvclient",
 			Name:      "write_tikv_latency",
 			Help:      "Bucketed histogram of write tikv.",
-			Buckets:   prometheus.ExponentialBuckets(0.0005, 2, 18),
+			Buckets:   prometheus.ExponentialBuckets(1, 2, 21),
 		}, []string{"type"})
 )
 

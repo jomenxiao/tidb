@@ -603,13 +603,13 @@ func (c *twoPhaseCommitter) execute(ctx goctx.Context) error {
 			return errors.Trace(binlogErr)
 		}
 		binlogTS := time.Now()
-		writeBinlogLatency.WithLabelValues("writebinlog").Observe(binlogTS.Sub(startTS).Nanoseconds())
+		writeBinlogLatency.Observe(binlogTS.Sub(startTS).Nanoseconds())
 	}
 	if err != nil {
 		log.Debugf("2PC failed on prewrite: %v, tid: %d", err, c.startTS)
 		return errors.Trace(err)
 	}
-	writeTikvLatency.WithLabelValues("writetikv").Observe(tikvTS.Sub(startTS).Nanoseconds())
+	writeTikvLatency.Observe(tikvTS.Sub(startTS).Nanoseconds())
 
 	commitTS, err := c.store.getTimestampWithRetry(NewBackoffer(tsoMaxBackoff, ctx))
 	if err != nil {
